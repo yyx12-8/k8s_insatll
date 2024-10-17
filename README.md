@@ -54,3 +54,4 @@ nodes
 # 4.ssh-copy-id root@你管理的ip  
 
 # 5.控制主机上，cd到项目目录， 执行ansible-playbook k8s_install.yaml  
+# 求职中。。。。各位大哥点个star！！！！！
