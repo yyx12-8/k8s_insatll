@@ -1,0 +1,44 @@
+---
+# 停止 firewalld 并禁用它
+- name: Stop and disable firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: false
+
+# 禁用 SELinux (临时)
+- name: Temporarily disable SELinux
+  selinux:
+    state: disabled
+  when: ansible_selinux.status == "enabled"
+
+# 注释掉 /etc/fstab 中的 swap 相关行
+- name: Comment out swap entries in /etc/fstab
+  lineinfile:
+    path: /etc/fstab
+    regexp: '^(.*swap.*)$'
+    line: '# \1'
+    state: present
+    backup: yes
+
+# 禁用 swap
+- name: Disable swap
+  command: swapoff -a
+  when: ansible_swaptotal_mb > 0  # 仅当系统启用了 swap 时执行
+
+- name: Set up time synchronization
+  command: ntpdate ntp1.aliyun.com
+  register: ntpdate_result
+  retries: 5
+  delay: 10
+  until: ntpdate_result.rc == 0  # 直到命令成功
+  ignore_errors: true  # 即使同步失败，也允许继续
+
+# 添加 /etc/hosts 中的条目
+- name: Add entries to /etc/hosts
+  blockinfile:
+    path: /etc/hosts
+    block: |
+      192.168.29.220 master01
+      192.168.29.221 node01
+      192.168.29.222 node02

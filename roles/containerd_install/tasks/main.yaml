@@ -1,0 +1,58 @@
+---
+# 安装基础依赖包
+- name: Install yum-utils, device-mapper-persistent-data, lvm2
+  yum: 
+    name:
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2 
+    state: present
+
+- name: Add Docker CE repository using yum-config-manager
+  command: yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+
+
+- name: Modify docker-ce.repo to use Aliyun mirror
+  command: sed -i 's+download.docker.com+mirrors.aliyun.com/docker-ce+' /etc/yum.repos.d/docker-ce.repo
+  args:
+    removes: /etc/yum.repos.d/docker-ce.repo
+  ignore_errors: yes  # 如果文件不存在，可以忽略错误
+
+# 更新 yum 缓存
+- name: Update yum docker_cache
+  shell: sudo yum makecache fast
+
+# 创建 /etc/modules-load.d/containerd.conf 并加载内核模块
+- name: Create /etc/modules-load.d/containerd.conf
+  copy:
+    dest: /etc/modules-load.d/containerd.conf
+    content: |
+      overlay
+      br_netfilter
+
+# 加载 overlay 模块
+- name: Load overlay module
+  shell: modprobe overlay
+  # 不显示警告
+  args:
+    warn: false
+
+# 加载 br_netfilter 模块
+- name: Load br_netfilter module
+  shell: modprobe br_netfilter
+  # 不显示警告
+  args:
+    warn: false
+
+# 安装 containerd
+- name: Install containerd
+  yum: 
+    name: containerd.io
+    state: present
+
+# 启动并启用 containerd
+- name: Start and enable containerd service
+  service:
+    name: containerd
+    state: started
+    enabled: true

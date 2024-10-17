@@ -1,0 +1,44 @@
+---
+# 重置现有的 Kubernetes 集群（如果有）
+- name: Reset existing Kubernetes cluster (if any)
+  command: kubeadm reset -f
+  ignore_errors: true  # 忽略可能的错误，例如没有集群时的错误
+
+# 初始化 Kubernetes 集群，指定版本、镜像仓库和网络配置
+- name: Initialize the Kubernetes cluster
+  command: kubeadm init --kubernetes-version=v1.28.2 \
+    --apiserver-advertise-address=192.168.29.220 \
+    --image-repository registry.aliyuncs.com/google_containers \
+    --pod-network-cidr=172.16.0.0/16
+  register: kubeadm_init_output
+
+- name: Get the join command and save to a file
+  command: kubeadm token create --print-join-command
+  register: join_command
+  delegate_to: 192.168.29.220  # 替换为 Master 节点的 IP 地址
+
+- name: Save join command to a file on the control node
+  copy:
+    content: "{{ join_command.stdout }}"
+    dest: /tmp/kube_join_command.txt
+  delegate_to: localhost
+
+# 为 root 用户配置 kubeconfig
+- name: Set up kubeconfig for the root user
+  shell: "{{ item }}"
+  with_items:
+    - mkdir -p $HOME/.kube
+    - cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    - chown $(id -u):$(id -g) $HOME/.kube/config
+  become: true
+
+# 安装 Calico 网络插件的配置文件
+- name: Create Calico network plugin configuration
+  template:
+    src: calico.yaml.j2
+    dest: /tmp/calico.yaml
+
+# 应用 Calico 网络插件
+- name: Apply Calico network plugin
+  command: kubectl apply -f /tmp/calico.yaml
+  when: kubeadm_init_output is succeeded

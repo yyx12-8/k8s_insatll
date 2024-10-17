@@ -1,0 +1,5 @@
+---
+# vars file for upgrade_kernel
+KERNEL_RPM_DIR: "/usr/local/src"
+KERNEL_VERSION: "5.4.257-1"
+#

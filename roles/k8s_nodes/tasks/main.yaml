@@ -1,0 +1,13 @@
+---
+- name: Copy join command to all nodes
+  copy:
+    src: /tmp/kube_join_command.txt
+    dest: /tmp/kube_join_command.txt
+  when: inventory_hostname in groups['k8s_nodes']  # 仅在 Node 节点执行
+
+# 加入集群
+- name: Read join command from the file 
+  command: bash /tmp/kube_join_command.txt
+  when: inventory_hostname in groups['k8s_nodes']  # 仅在 Node 节点执行
+
+

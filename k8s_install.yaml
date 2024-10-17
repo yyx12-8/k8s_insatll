@@ -1,0 +1,36 @@
+---
+- name: Upgrade kernel on all nodes
+  hosts: k8s_all
+  remote_user: root
+  roles:
+    - upgrade_kernel
+
+- name: Initialize environment on all nodes
+  hosts: k8s_all
+  remote_user: root
+  roles:
+    - Init_env
+
+- name: Install containerd on all nodes
+  hosts: k8s_all
+  remote_user: root
+  roles:
+    - containerd_install
+
+- name: Install Kubernetes environment on all nodes
+  hosts: k8s_all
+  remote_user: root
+  roles:
+    - k8s_all  # 公共任务，所有节点执行
+
+- name: Install Kubernetes on master nodes
+  hosts: k8s_masters
+  remote_user: root
+  roles:
+    - k8s_master  # 仅 master 节点执行
+
+- name: Install Kubernetes on worker nodes
+  hosts: k8s_nodes
+  remote_user: root
+  roles:
+    - k8s_nodes  # 仅 worker 节点执行

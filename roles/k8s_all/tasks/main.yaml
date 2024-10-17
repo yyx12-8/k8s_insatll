@@ -1,0 +1,40 @@
+---
+# 设置 Kubernetes 仓库
+- name: Set up Kubernetes repository
+  copy:
+    dest: /etc/yum.repos.d/kubernetes.repo
+    content: |
+      [kubernetes]
+      name=Kubernetes
+      baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+      enabled=1
+      gpgcheck=0
+      repo_gpgcheck=0
+      gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+
+- name: Make yum k8s_cache
+  command: yum makecache
+  become: true
+
+# 安装 kubelet, kubeadm 和 kubectl
+- name: Install specific version of kubectl, kubelet, and kubeadm
+  yum:
+    name:
+      - kubectl-1.28.2
+      - kubelet-1.28.2
+      - kubeadm-1.28.2
+    state: present
+
+- name: Generate containerd config file
+  template:
+    src: config.toml.j2
+    dest: /etc/containerd/config.toml
+  notify:
+    - Restart containerd
+
+# 启用并启动 kubelet 服务
+- name: Enable and start kubelet
+  systemd:
+    name: kubelet
+    enabled: true
+    state: started

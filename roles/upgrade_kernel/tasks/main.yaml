@@ -1,0 +1,84 @@
+---
+- name: Copy kernel RPM files
+  copy: 
+    src: kernel_rpm 
+    dest: "{{ KERNEL_RPM_DIR }}"
+
+- name: Remove kernel-tools-3.10.0 and kernel-tools-libs-3.10.0
+  yum: 
+    name: kernel-tools-3.10.0,kernel-tools-libs-3.10.0 
+    state: removed
+
+- name: Install kernel-lt
+  yum:
+    name: "{{ item }}"
+    state: installed
+  loop:
+    - "{{ KERNEL_RPM_DIR }}/kernel_rpm/kernel-lt-{{ KERNEL_VERSION }}.el7.elrepo.x86_64.rpm"
+    - "{{ KERNEL_RPM_DIR }}/kernel_rpm/kernel-lt-devel-{{ KERNEL_VERSION }}.el7.elrepo.x86_64.rpm"
+    - "{{ KERNEL_RPM_DIR }}/kernel_rpm/kernel-lt-tools-libs-{{ KERNEL_VERSION }}.el7.elrepo.x86_64.rpm"
+    - "{{ KERNEL_RPM_DIR }}/kernel_rpm/kernel-lt-tools-{{ KERNEL_VERSION }}.el7.elrepo.x86_64.rpm"
+
+- name: Set default load grub version
+  shell: grub2-set-default 0
+
+- name: Create sysctl configuration file for Kubernetes
+  copy:
+    dest: /etc/sysctl.d/Kubernetes.conf
+    content: |
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.bridge.bridge-nf-call-iptables = 1
+      net.ipv4.ip_forward = 1
+      vm.swappiness = 0
+  notify: reload sysctl
+
+- name: Install wget
+  yum:
+    name: wget 
+    state: present
+
+- name: Add AILi EPEL repository
+  get_url:
+    url: https://mirrors.aliyun.com/repo/epel-7.repo
+    dest: /etc/yum.repos.d/epel.repo
+
+- name:  yum makecache
+  shell: yum makecache
+
+- name: Install necessary packages
+  yum:
+    name:
+      - conntrack 
+      - ipvsadm 
+      - ipset 
+      - jq 
+      - iptables 
+      - curl 
+      - sysstat 
+      - libseccomp 
+      - ntpdate
+    state: present
+
+- name: Ensure modules-load.d directory exists
+  file:
+    path: /etc/modules-load.d
+    state: directory
+
+- name: Create /etc/modules-load.d/ipvs.conf
+  copy:
+    dest: /etc/modules-load.d/ipvs.conf
+    content: |
+      ip_vs
+      ip_vs_rr
+      ip_vs_wrr
+      ip_vs_sh
+      nf_conntrack
+
+
+- name: Load kernel modules
+  command: systemctl enable --now systemd-modules-load
+
+
+- name: Reboot the system
+  reboot:
+    reboot_timeout: 300
