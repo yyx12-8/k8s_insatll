@@ -1,3 +1,4 @@
+首先清理repo 然后下载ali源   因为是实验项目，也可以自行添加到ansible剧本中去，clean 后 ，wget 就好啦！！  
 wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo  
 curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
 
