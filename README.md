@@ -2,21 +2,21 @@
 https://blog.csdn.net/qq_43527128/article/details/141996193?ops_request_misc=%257B%2522request%255Fid%2522%253A%25229EAC6653-990C-4AFE-8B3D-FC118F8B3077%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&request_id=9EAC6653-990C-4AFE-8B3D-FC118F8B3077&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_ecpm_v1~rank_v31_ecpm-2-141996193-null-null.nonecase&utm_term=ansible&spm=1018.2226.3001.4450  
 2.配置你的主机清单  一般在/etc/ansible/hosts中  
 例：  
-[k8s_all]
-master ansible_host=192.168.29.220
-node1 ansible_host=192.168.29.221
-node2 ansible_host=192.168.29.222
+[k8s_all]  
+master ansible_host=192.168.29.220  
+node1 ansible_host=192.168.29.221  
+node2 ansible_host=192.168.29.222  
 
-[k8s_masters]
-master ansible_host=192.168.29.220
+[k8s_masters]  
+master ansible_host=192.168.29.220  
 
-[k8s_nodes]
-node1 ansible_host=192.168.29.221
-node2 ansible_host=192.168.29.222
+[k8s_nodes]  
+node1 ansible_host=192.168.29.221  
+node2 ansible_host=192.168.29.222  
 
-[kubernetes:children]
-masters
-nodes
+[kubernetes:children]  
+masters  
+nodes  
 
 3.修改roles/k8s_master/tasks/main.yaml  第18 行  为你master ip  
 - name: Get the join command and save to a file  
