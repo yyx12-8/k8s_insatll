@@ -5,8 +5,9 @@ wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos
 or  
 curl -o /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo  
 ## 自动  
-第37-53行修改为   警告：加入到ansible实验环境会很慢  实验环境建议手动安装  
+警告：加入到ansible实验环境会很慢  实验环境建议手动安装  
 在roles/k8s_master/upgrade_kernel/tasks/main.yaml  
+第37-53行修改为   
 - name: Download centos.aliyum.repo  
   get_url:  
     url: https://mirrors.aliyun.com/repo/Centos-7.repo  
