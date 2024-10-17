@@ -22,11 +22,22 @@ node2 ansible_host=192.168.29.222
 masters  
 nodes  
 
-3.修改roles/k8s_master/tasks/main.yaml  第18 行  为你master ip  
+
+3.修改roles/k8s_master/tasks/main.yaml  # 这里的ip修改为你的master节点ip  
+一共两处需要修改  第10行  第18行  
+  
+# 初始化 Kubernetes 集群，指定版本、镜像仓库和网络配置
+- name: Initialize the Kubernetes cluster
+  command: kubeadm init --kubernetes-version=v1.28.2 \
+    --apiserver-advertise-address=xxxxxxx \      # 这里的ip修改为你的master节点ip
+    --image-repository registry.aliyuncs.com/google_containers \
+    --pod-network-cidr=172.16.0.0/16
+  register: kubeadm_init_output
+  修改roles/k8s_master/tasks/main.yaml  第18 行  为你master ip  
 - name: Get the join command and save to a file  
   command: kubeadm token create --print-join-command  
   register: join_command  
-  delegate_to: xxxxxxxx  # 替换为 Master 节点的 IP 地址
+  delegate_to: xxxxxxxx     # 替换为 Master 节点的 IP 地址
 
 4.ssh-copy-id root@你管理的ip  
 
