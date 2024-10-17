@@ -5,6 +5,8 @@ https://blog.csdn.net/qq_43527128/article/details/141996193?ops_request_misc=%25
 - name: Get the join command and save to a file  
   command: kubeadm token create --print-join-command  
   register: join_command  
-  delegate_to: xxxxxxxx  # 替换为 Master 节点的 IP 地址  
+  delegate_to: xxxxxxxx  # 替换为 Master 节点的 IP 地址
 
-4.控制主机上，cd到项目目录， 执行ansible-playbook k8s_install.yaml  
+4.ssh-copy-id root@你管理的ip  
+
+5.控制主机上，cd到项目目录， 执行ansible-playbook k8s_install.yaml  
